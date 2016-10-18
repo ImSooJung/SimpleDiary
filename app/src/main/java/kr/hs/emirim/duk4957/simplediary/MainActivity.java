@@ -1,11 +1,15 @@
 package kr.hs.emirim.duk4957.simplediary;
 
-import java.util.Calendar;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Button;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
     DatePicker datePic;
@@ -31,15 +35,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 fileName =year+" "+(monthOfYear+1)+"_"+dayOfMonth+".txt";
-                String content=readDiary(fileName);
+                String content= null;
+                try {
+                    content = readDiary(fileName);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
                 editDiary.setText(content);
                 butSave.setEnabled(true);
 
             }
         });
     }
-    String readDiary(String fileName){
-
-        return null;
+    String readDiary(String fileName) throws FileNotFoundException {
+        String diaryContents=null;
+        try {
+            FileInputStream in = openFileInput(fileName);
+            byte[] txt=new byte[500];
+            in.read(txt);
+            in.close();
+            diaryContents=new String(txt);
+            butSave.setText("수정하기");
+        }catch (IOException e) {
+            editDiary.setHint("읽어올 일기가 없음");//읽어올 파일이 없을 때 editDiary에 힌트 설정
+            butSave.setText("새로 저장");
+        }
+        return diaryContents;
     }
 }
